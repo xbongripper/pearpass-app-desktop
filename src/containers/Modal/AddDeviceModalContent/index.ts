@@ -36,6 +36,8 @@ import { useModal } from '../../../context/ModalContext'
 import { useRouter } from '../../../context/RouterContext'
 import { useToast } from '../../../context/ToastContext'
 import { useCopyToClipboard } from '../../../hooks/useCopyToClipboard'
+import { useAutoLockPreferences } from '../../../hooks/useAutoLockPreferences'
+import { useGlobalLoading } from '../../../context/LoadingContext'
 import { useTranslation } from '../../../hooks/useTranslation'
 import {
   CopyIcon,
@@ -69,8 +71,16 @@ export const AddDeviceModalContent = () => {
     cancelPairActiveVault
   } = usePair()
   const { navigate } = useRouter()
+  const { setShouldBypassAutoLock } = useAutoLockPreferences()
 
   const { copyToClipboard, isCopied } = useCopyToClipboard()
+
+  useEffect(() => {
+    setShouldBypassAutoLock(true)
+    return () => setShouldBypassAutoLock(false)
+  }, [setShouldBypassAutoLock])
+
+  useGlobalLoading({ isLoading: isPairing })
 
   useEffect(() => {
     createInvite()
@@ -194,10 +204,10 @@ export const AddDeviceModalContent = () => {
       <${Content}>
         <${PairingDescription}>
           ${t(
-            scanQRStep
-              ? 'Scan this QR code or paste the vault key into the PearPass app on your other device to connect it to your account. This method keeps your account secure.'
-              : 'Paste the vault key from the PearPass app on your other device to connect it to your account. This method keeps your account secure.'
-          )}
+    scanQRStep
+      ? 'Scan this QR code or paste the vault key into the PearPass app on your other device to connect it to your account. This method keeps your account secure.'
+      : 'Paste the vault key from the PearPass app on your other device to connect it to your account. This method keeps your account secure.'
+  )}
         <//>
         <${PairTabs}>
           <${PairTab}
@@ -216,7 +226,7 @@ export const AddDeviceModalContent = () => {
           <//>
         <//>
         ${scanQRStep
-          ? html`
+      ? html`
               <${QRCodeSection}>
                 <${QRCodeText}> ${t('Scan this QR code while in the PearPass App')} <//>
 
@@ -229,7 +239,7 @@ export const AddDeviceModalContent = () => {
               <${BackgroundSection}>
                 <${ExpireText}>
                   ${t('Expires in')}
-                  <${ScanQRExpireTimer} />
+                  <${ScanQRExpireTimer} onFinish=${closeModal} />
                 <//>
 
                 <${TimeIcon} color=${colors.primary400.mode1} />
@@ -237,14 +247,14 @@ export const AddDeviceModalContent = () => {
 
               <${BackgroundSection}
                 onClick=${() => {
-                  if (data?.publicKey) {
-                    copyToClipboard(data.publicKey)
-                  } else {
-                    setToast({
-                      message: t('Invite code not found')
-                    })
-                  }
-                }}
+          if (data?.publicKey) {
+            copyToClipboard(data.publicKey)
+          } else {
+            setToast({
+              message: t('Invite code not found')
+            })
+          }
+        }}
               >
                 <${QRCodeCopyWrapper}>
                   <${QRCodeCopy}>
@@ -261,11 +271,11 @@ export const AddDeviceModalContent = () => {
 
               <${AlertBox}
                 message=${t(
-                  'Keep this code private. Anyone with it can connect a device to your vault.'
-                )}
+          'Keep this code private. Anyone with it can connect a device to your vault.'
+        )}
               />
             `
-          : html`
+      : html`
               <${InputFieldWrapper}>
                 <${InputField}
                   testId="add-device-input-code"
@@ -284,7 +294,7 @@ export const AddDeviceModalContent = () => {
                 />
               <//>
               ${isPairing &&
-              html`
+        html`
                 <${LoadVaultNotice}> ${t('Click Escape to cancel pairing')} <//>
               `}
             `}
