@@ -18,7 +18,7 @@ function getApp() {
 
     const arg = process.argv[index]
     const { appling } = JSON.parse(arg).flags || {}
-
+    console.log(appling, 'appling getApp')
     if (!appling) return
     if (IS_MAC) {
       return path.join(appling, '..', '..', '..') // appling path points to the bin
