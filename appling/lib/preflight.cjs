@@ -1,4 +1,4 @@
-const appling = require("appling-native");
+const appling = require('appling-native')
 
 /**
  * Performs pre-installation checks to determine if the app is already installed.
@@ -11,29 +11,29 @@ const appling = require("appling-native");
  */
 async function preflight(id) {
   // Acquire lock without specifying dir - appling-native uses default location
-  const lock = await appling.lock();
+  const lock = await appling.lock()
 
-  let platform;
+  let platform
   try {
-    platform = await appling.resolve();
+    platform = await appling.resolve() //lock.dir if infinite loop
   } catch (err) {
     // Platform not found - installation required
-    return { lock, needsInstall: true, launched: false };
+    return { lock, needsInstall: true, launched: false }
   }
 
-  const ready = platform.ready(`pear://${id}`);
+  const ready = platform.ready(`pear://${id}`)
 
   if (ready === false) {
-    return { lock, needsInstall: true, launched: false };
+    return { lock, needsInstall: true, launched: false }
   }
 
   // App is already installed and ready - launch it directly
-  await lock.unlock();
-  platform.launch(id);
+  await lock.unlock()
+  platform.launch(id)
 
   // Return sentinel value indicating app was launched
   // Caller should exit the process after receiving this
-  return { lock: null, needsInstall: false, launched: true };
+  return { lock: null, needsInstall: false, launched: true }
 }
 
-module.exports = { preflight };
+module.exports = { preflight }
