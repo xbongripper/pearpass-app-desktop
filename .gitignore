@@ -69,3 +69,8 @@ appling/node_modules/
 test-results
 
 out/
+
+&& !this.parent
+this.parent
+ignore-walk
+this.parent === null
